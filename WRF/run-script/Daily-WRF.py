@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-21T08:11+09:00)
+# (Last Update: 2014-05-22T01:31+09:00)
 
 import os, sys
 import datetime
@@ -10,7 +10,7 @@ import subprocess
 START=datetime.datetime(2013,6,1)
 
 START_DATE=datetime.datetime(2013,6,1)
-END_DATE=datetime.datetime(2013,6,3)
+END_DATE=datetime.datetime(2013,6,2)
 NOW=START_DATE
 DAYS=END_DATE-START_DATE
 
@@ -32,13 +32,21 @@ for day in range(DAYS.days):
         os.system("sed 's/(START_DATE)/{DATE1}/g; s/(END_DATE)/{DATE2}/g' namelist.wps.tmpl > namelist.wps".format(
             DATE1=NOW.isoformat().replace("T","_"),
             DATE2=TOMORROW.isoformat().replace("T","_")))
-        os.system("./geogrid.exe > geogrid.log")
+#        os.system("./geogrid.exe > geogrid.log")
 
     ## ungrib
-    MET="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}*".format(DATE=NOW.strftime("%Y%m%d"))
-
-    os.system("./link_grib.csh {MET}".format(MET=MET))
     os.system("ln -fs ./ungrib/Variable_Tables/Vtable.GFS Vtable")
+#    for hour in range(5):
+    #HOURLY=NOW+datetime.timedelta(hours=6*hour)
+    #print(HOURLY)
+
+    MET_TODAY="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=NOW.strftime("%Y%m%d"))
+    MET_TOMMOROW="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=TOMORROW.strftime("%Y%m%d_%H_%M"))
+    #MET="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}*".format(DATE=NOW.strftime("%Y%m%d"))
+
+    os.system("./link_grib.csh {met_today}* {met_tomorrow}".format(met_today=MET_TODAY,
+        met_tomorrow=MET_TOMMOROW
+        ))
     os.system("./ungrib.exe > ungrib.log") # Output for ungrib.exe result.
 
     ## metgrid
@@ -76,6 +84,6 @@ for day in range(DAYS.days):
  
     #os.system("time mpirun -n 2 ./real.exe > real.log" )
     #os.system("time mpirun -n 2 ./wrf.exe > wrf.log" )
-    os.system("time ./real.exe > real.log" )
-    os.system("time ./wrf.exe > wrf.log 2>&1")
+    os.system("time mpirun -n 1 ./real.exe > real.log" )
+    os.system("time mpirun -n 1 ./wrf.exe > wrf.log 2>&1")
 
