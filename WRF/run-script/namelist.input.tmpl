@@ -6,46 +6,49 @@
  start_year                          = (YEAR1), (YEAR1), (YEAR1),
  start_month                         = (MONTH1),   (MONTH1),   (MONTH1),
  start_day                           = (DAY1),   (DAY1),   (DAY1),
- start_hour                          = (HOUR1),   (HOUR1),   (HOUR1),
+ start_hour                          = 00,   00,   00,
  start_minute                        = 00,   00,   00,
  start_second                        = 00,   00,   00,
- end_year                          = (YEAR2), (YEAR2), (YEAR2),
- end_month                         = (MONTH2),   (MONTH2),   (MONTH2),
- end_day                           = (DAY2),   (DAY2),   (DAY2),
- end_hour                          = (HOUR2),   (HOUR2),   (HOUR2),
+ end_year                            = (YEAR2), (YEAR2), (YEAR2),
+ end_month                           = (MONTH2),   (MONTH2),   (MONTH2),
+ end_day                             = (DAY2),   (DAY2),   (DAY2),
+ end_hour                            = 00,   00,   00,
  end_minute                          = 00,   00,   00,
  end_second                          = 00,   00,   00,
  interval_seconds                    = 21600
  input_from_file                     = .true.,.true.,.true.,
  history_interval                    = 60,  60,   60,
  frames_per_outfile                  = 1000, 1000, 1000,
- restart                             = .false.,
- restart_interval                    = 5000,
+ restart                             = (IS_RESTART),
+ restart_interval                    = 1440,
+ reset_simulation_start              = .true.,
+ write_hist_at_0h_rst                = .true.,
  io_form_history                     = 2
  io_form_restart                     = 2
  io_form_input                       = 2
  io_form_boundary                    = 2
- debug_level                         = 0
+ debug_level                         = 100
+ nocolons                = .false.
  /
 
  &domains
- time_step                           = 15,
+ time_step                           = 60,
  time_step_fract_num                 = 0,
  time_step_fract_den                 = 1,
  max_dom                             = 1,
- e_we                                = 74,    112,   94,
- e_sn                                = 61,    97,    91,
+ e_we                                = 74,    81,   94,
+ e_sn                                = 61,    71,    91,
  e_vert                              = 30,    30,    30,
- p_top_requested                     = 5000,
+ p_top_requested                     = 10000,
  num_metgrid_levels                  = 27,
  num_metgrid_soil_levels             = 4,
  dx                                  = 2500, 500,  100,
  dy                                  = 2500, 500,  100,
  grid_id                             = 1,     2,     3,
- parent_id                           = 0,     1,     2,
- i_parent_start                      = 1,     31,    30,
- j_parent_start                      = 1,     17,    30,
- parent_grid_ratio                   = 1,     3,     3,
+ parent_id                           = 1,     1,     2,
+ i_parent_start                      = 1,     5,    30,
+ j_parent_start                      = 1,     20,    30,
+ parent_grid_ratio                   = 1,     5,     3,
  parent_time_step_ratio              = 1,     3,     3,
  feedback                            = 1,
  smooth_option                       = 0
@@ -67,7 +70,7 @@
  icloud                              = 1,
  surface_input_source                = 1,
  num_soil_layers                     = 4,
- sf_urban_physics                    = 0,     0,     0,
+ sf_urban_physics                    = 1,     1,     1,
  /
 
  &fdda
@@ -105,3 +108,6 @@
  nio_tasks_per_group = 0,
  nio_groups = 1,
  /
+
+
+

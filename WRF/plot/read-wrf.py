@@ -6,9 +6,16 @@ import netCDF4
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import numpy as np
+import os
 
-MODEL_FILE="./wrfout_d01_2013-01-01_00_00_00"
-MODEL_NC=netCDF4.Dataset(MODEL_FILE)
+INDIR="/home/senooken/model/WRF/WRF-3.6-single/WRFV3/run/"
+INFILE="wrfout_d01_2013-06-01_00:00:00"
+FR=INDIR+INFILE
+OUTDIR="./fig/"
+
+if not os.path.exists(OUTDIR): os.makedirs(OUTDIR)
+
+MODEL_NC=netCDF4.Dataset(FR)
 
 # MODEL_NC.ncattrs() # all attributes list
 
@@ -53,7 +60,7 @@ MESH_PROJ_X,MESH_PROJ_Y=bm(MODEL_NC.variables["XLONG"][0],MODEL_NC.variables["XL
 plt.pcolormesh(MESH_PROJ_X,MESH_PROJ_Y,MODEL_NC.variables["T2"][0])
 plt.colorbar(fraction=0.1,pad=0.01)
 
-plt.savefig("./T2_.png",bbox_inches="tight")
+plt.savefig(OUTDIR+"T2.png",bbox_inches="tight")
 
 
 
