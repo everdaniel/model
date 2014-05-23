@@ -1,9 +1,9 @@
 #!/ur/bin/env python2.7
 # -*- coding: utf-8 -*-
 # @author: SENOO, Ken
-# (Last Update: 2014-05-20T12:00+09:00)
+# (Last Update: 2014-05-23T17:14+09:00)
 
-#import numpy as np
+import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
 import sys
@@ -60,13 +60,13 @@ BM.drawcoastlines()
 BM.drawcountries()
 
 #m.fillcontinents()
-BM.fillcontinents(color="green")
+BM.fillcontinents(color=(0.8,1,0.8))
 BM.drawmapboundary()
 #m.fillcontinents(lake_color="aqua")
 #m.drawmapboundary(fill_color="aqua")
 
-BM.drawparallels(range(-90, 90, 10), labels = [1,0,0,0], fontsize=16,dashes=[1,1])
-BM.drawmeridians(range(-180, 180, 10), labels = [0,0,0,1], fontsize=16,dashes=[1,1])
+BM.drawparallels(np.arange(-90, 90, 0.1), labels = [1,0,0,0], fontsize=16,dashes=[1,1])
+BM.drawmeridians(np.arange(-180, 180, 0.1), labels = [0,0,0,1], fontsize=16,dashes=[1,1])
 
 
 ## plot center position
@@ -78,7 +78,7 @@ cenlon[0], cenlat[0]=BM(cenlon_model, cenlat_model, inverse=True)
 
 #plt.plot(cenlon,cenlat,marker="o",color="gray")
 plt.plot(cenlon_model,cenlat_model, marker="o", color="gray")
-plt.text(cenlon_model*1.1, cenlat_model*1.1, "({cenlon}, {cenlat})".format(
+plt.text(cenlon_model*1.01, cenlat_model*1.01, "({cenlon}, {cenlat})".format(
     cenlon=round(cenlon[0],2), cenlat=round(cenlat[0],2))
         )
 #print cenlon, cenlat
@@ -106,7 +106,7 @@ if MAX_DOM >= 2:
     draw_screen_poly(lat, lon)
     #plt.scatter(lon,lat)
     plt.plot(lon, lat, "o")
-    plt.text(lon[0]*0.9, lat[0]*0.9, "({i}, {j})".format(i=I_PARENT_START[1], j=J_PARENT_START[1]))
+#    plt.text(lon[0]*0.9, lat[0]*0.9, "({i}, {j})".format(i=I_PARENT_START[1], j=J_PARENT_START[1]))
 #    for node in range(4):
 #        plt.text(lon[node],lat[node],"({i}, {j})".format(i=I_PARENT_START[1], j=J_PARENT_START[1]))
 #
@@ -176,6 +176,19 @@ if MAX_DOM >= 4:
     #print m(cenlon, cenlat,inverse=True)
     cenlon[3], cenlat[3]=BM(cenlon_model, cenlat_model, inverse=True)
 
+
+with open("/home/senooken/run/20140528_WIND_MTG/observation-position-d2.csv") as f:
+    f.next()
+    for line in f:
+        X,Y=BM(*map(float, line.strip().split(",")[1:]))
+        LABEL=line.strip().split(",")[0]
+        plt.plot(X,Y,"o",label=LABEL)
+#        print(line)
+
+plt.legend(loc="best")
+plt.title("Domain and AMeDAS Observation",size=18)
+#plt.plot(133.1017)
+
 ## save domain by pdf and png
 plt.savefig("domain-test.pdf", bbox_inches="tight",edgecolor="none")
 plt.savefig("domain-test.png", bbox_inches="tight", edgecolor="none")
@@ -183,4 +196,5 @@ plt.savefig("domain-test.png", bbox_inches="tight", edgecolor="none")
 # print each domain center lon lat
 for i in range(MAX_DOM):
     print cenlon[i], cenlat[i]
+
 
