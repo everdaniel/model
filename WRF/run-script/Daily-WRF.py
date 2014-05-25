@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-23T19:27+09:00)
+# (Last Update: 2014-05-25T20:40+09:00)
 
 import os, sys
 import datetime
@@ -11,7 +11,7 @@ import glob
 START=datetime.datetime(2013,6,1)
 
 START_DATE=datetime.datetime(2013,6,1)
-END_DATE=datetime.datetime(2013,6,8)
+END_DATE=datetime.datetime(2013,6,2)
 NOW=START_DATE
 DAYS=END_DATE-START_DATE
 
@@ -34,7 +34,7 @@ for day in range(DAYS.days):
     if NOW == START:
         print("first date run geogrid")
         #os.system("mpirun -n 4 ./geogrid.exe &> geogrid.log")
-        os.system("./geogrid.exe > geogrid.log 2>&1")
+#        os.system("./geogrid.exe > geogrid.log 2>&1")
 
     
         FR="./namelist.wps.tmpl"
@@ -45,6 +45,21 @@ for day in range(DAYS.days):
                    line=line.replace("=","").replace(",","")
                    NAME_DICT.update({line.split()[0]: line.split()[1:]})
         NAME_DICT["parent_id"][0]="0"
+        MAX_DOM=map(int, NAME_DICT["max_dom"])[0]
+
+        DX=range(MAX_DOM)
+        DY=range(MAX_DOM)
+
+        DX[0]=float(NAME_DICT["dx"][0])
+        DY[0]=float(NAME_DICT["dy"][0])
+        PARENT_ID=map(int, NAME_DICT["parent_id"])
+        PARENT_GRID_RATIO=map(int, NAME_DICT["parent_grid_ratio"])
+        
+        for domain in range(1,MAX_DOM):
+            DX[domain]=DX[PARENT_ID[domain]-1]/PARENT_GRID_RATIO[domain]
+            DY[domain]=DY[PARENT_ID[domain]-1]/PARENT_GRID_RATIO[domain]
+
+
 
     ## ungrib
     os.system("ln -fs ./ungrib/Variable_Tables/Vtable.GFS Vtable")
@@ -56,11 +71,11 @@ for day in range(DAYS.days):
     os.system("./link_grib.csh {met_today}* {met_tomorrow}".format(met_today=MET_TODAY,
         met_tomorrow=MET_TOMMOROW
         ))
-    os.system("./ungrib.exe > ungrib.log 2>&1") # Output for ungrib.exe result.
+#    os.system("./ungrib.exe > ungrib.log 2>&1") # Output for ungrib.exe result.
 
     ## metgrid
     print("metgrid")
-    os.system("./metgrid.exe > metgrid.log 2>&1")
+#    os.system("./metgrid.exe > metgrid.log 2>&1")
 
     os.chdir(WRF_DIR)
     
@@ -71,7 +86,6 @@ for day in range(DAYS.days):
     else:
         IS_RESTART = ".true."
 
-    ## dx and dy is not yet
     os.system("""sed '
     s/(YEAR1)/{year1}/g;
     s/(MONTH1)/{month1}/g;
@@ -90,18 +104,18 @@ for day in range(DAYS.days):
     s/(J_PARENT_START)/{j_parent_start}/;
     s/(PARENT_GRID_RATIO)/{parent_grid_ratio}/;
     ' namelist.input.tmpl > namelist.input""".format(
-        year1=NOW.year,
-        month1=NOW.month,
-        day1=NOW.day,
-        year2=TOMORROW.year,
-        month2=TOMORROW.month,
-        day2=TOMORROW.day,
+        year1=(str(NOW.year)+", ")*MAX_DOM,
+        month1=(str(NOW.month)+", ")*MAX_DOM,
+        day1=(str(NOW.day)+", ")*MAX_DOM,
+        year2=(str(TOMORROW.year)+", ")*MAX_DOM,
+        month2=(str(TOMORROW.month)+", ")*MAX_DOM,
+        day2=(str(TOMORROW.day)+", ")*MAX_DOM,
         is_start=IS_RESTART,
         max_dom=", ".join(NAME_DICT["max_dom"]),
         e_we=", ".join(NAME_DICT["e_we"]),
         e_sn=", ".join(NAME_DICT["e_sn"]),
-        dx=", ".join(NAME_DICT["dx"]),
-        dy=", ".join(NAME_DICT["dy"]),
+        dx=", ".join(map(str,DX)),
+        dy=", ".join(map(str, DY)),
         parent_id=", ".join(NAME_DICT["parent_id"]),
         i_parent_start=", ".join(NAME_DICT["i_parent_start"]),
         j_parent_start=", ".join(NAME_DICT["j_parent_start"]),
@@ -114,13 +128,14 @@ for day in range(DAYS.days):
     if not os.path.exists(LOGDIR): os.makedirs(LOGDIR)
 
     print("real")
-    os.system("time mpirun -n 8 ./real.exe > real.log 2>&1" )
+#    os.system("time mpirun -n 8 ./real.exe > real.log 2>&1" )
     for log in glob.glob("rsl.*"):
         os.rename(log, LOGDIR+"real-"+log+"-{now}".format(now=NOW.strftime("%Y%m%d")))
 
     print("wrf")
-    os.system("time mpirun -n 8 ./wrf.exe > wrf.log 2>&1")
+#    os.system("time mpirun -n 8 ./wrf.exe > wrf.log 2>&1")
     for log in glob.glob("rsl.*"):
         os.rename(log, LOGDIR+"real-"+log+"-{now}".format(now=NOW.strftime("%Y%m%d")))
 
     print("finish")
+    os.chdir(PWD)
