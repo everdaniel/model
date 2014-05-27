@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-fr="./geo_em.d01.nc"
+fr="/home/senooken/run/20140528_WIND_MTG/output/geo_em.d01.nc"
 geo_nc=netCDF4.Dataset(fr)
 
 save_dir="./fig/wrf/"
@@ -27,7 +27,7 @@ NCOLS,NROWS=geo_nc.__getattribute__( "WEST-EAST_PATCH_END_UNSTAG" ), geo_nc.__ge
 plt.ion()
 plt.clf()
 print("make Basemap object")
-m = Basemap(resolution="l", projection="lcc", lat_1=P_ALP, lat_2=P_BET, width=DX*(NCOLS-1), height=DY*(NROWS-1), lat_0=YCENT, lon_0=XCENT, rsphere=(6370000.0, 6370000.0))
+m = Basemap(resolution="f", projection="lcc", lat_1=P_ALP, lat_2=P_BET, width=DX*(NCOLS-1), height=DY*(NROWS-1), lat_0=YCENT, lon_0=XCENT, rsphere=(6370000.0, 6370000.0))
 
 ## x y coordinate
 XORIG,YORIG=m(geo_nc.corner_lons[0],geo_nc.corner_lats[0])
@@ -57,4 +57,5 @@ for var in varlist_mcip:
 #    plt.figtext(0.8,0.91,"[{unit}]".format(unit=geo_nc.variables[var].units.strip()),size=14)
     fw="landuse"
     plt.savefig(save_dir+fw+".png",bbox_inches="tight") 
+    plt.savefig(save_dir+fw+".pdf",bbox_inches="tight") 
 #    plt.savefig(save_dir+fw+".pdf",bbox_inches="tight") 

@@ -1,7 +1,7 @@
 #!/ur/bin/env python2.7
 # -*- coding: utf-8 -*-
 # @author: SENOO, Ken
-# (Last Update: 2014-05-23T17:14+09:00)
+# (Last Update: 2014-05-26T19:42+09:00)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -51,7 +51,7 @@ TRUELAT1 = float(NAME_DICT["truelat1"][0])
 TRUELAT2 = float(NAME_DICT["truelat2"][0])
 
 ## draw map
-BM = Basemap(resolution="i", projection="lcc", rsphere=(6370000.0, 6370000.0), 
+BM = Basemap(resolution="f", projection="lcc", rsphere=(6370000.0, 6370000.0), 
 lat_1=TRUELAT1, lat_2=TRUELAT2, lat_0=REF_LAT, lon_0=REF_LON, 
 width=DX*(E_WE[0]-1), height=DY*(E_SN[0]-1))
 

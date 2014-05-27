@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-25T20:40+09:00)
+# (Last Update: 2014-05-26T19:42+09:00)
 
 import os, sys
 import datetime
@@ -11,7 +11,7 @@ import glob
 START=datetime.datetime(2013,6,1)
 
 START_DATE=datetime.datetime(2013,6,1)
-END_DATE=datetime.datetime(2013,6,2)
+END_DATE=datetime.datetime(2013,6,8)
 NOW=START_DATE
 DAYS=END_DATE-START_DATE
 
@@ -28,14 +28,9 @@ for day in range(DAYS.days):
     os.chdir(WPS_DIR)
    
     ## geogrid
-    os.system("sed 's/(START_DATE)/{DATE1}/g; s/(END_DATE)/{DATE2}/g' namelist.wps.tmpl > namelist.wps".format(
-            DATE1=NOW.isoformat().replace("T","_"),
-            DATE2=TOMORROW.isoformat().replace("T","_")))
     if NOW == START:
         print("first date run geogrid")
-        #os.system("mpirun -n 4 ./geogrid.exe &> geogrid.log")
-#        os.system("./geogrid.exe > geogrid.log 2>&1")
-
+        os.system("./geogrid.exe > geogrid.log 2>&1")
     
         FR="./namelist.wps.tmpl"
         NAME_DICT={}
@@ -60,22 +55,31 @@ for day in range(DAYS.days):
             DY[domain]=DY[PARENT_ID[domain]-1]/PARENT_GRID_RATIO[domain]
 
 
+    os.system("""sed "
+            s/(START_DATE)/{DATE1}/g; 
+            s/(END_DATE)/{DATE2}/g;
+            " namelist.wps.tmpl > namelist.wps""".format(
+            DATE1=(str(NOW.isoformat().replace("T","_")))*MAX_DOM,
+            DATE2=(TOMORROW.isoformat().replace("T","_"))*MAX_DOM
+            )
+        )
 
     ## ungrib
+    print("ungrib")
     os.system("ln -fs ./ungrib/Variable_Tables/Vtable.GFS Vtable")
 
-    MET_TODAY="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=NOW.strftime("%Y%m%d"))
-    MET_TOMMOROW="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=TOMORROW.strftime("%Y%m%d_%H_%M"))
+    MET_TODAY=os.path.expanduser("~/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=NOW.strftime("%Y%m%d")))
+    MET_TOMMOROW=os.path.expanduser("~/model/WRF/NCEP-FNL/fnl_{DATE}".format(DATE=TOMORROW.strftime("%Y%m%d_%H_%M")))
     #MET="/home/senooken/model/WRF/NCEP-FNL/fnl_{DATE}*".format(DATE=NOW.strftime("%Y%m%d"))
 
     os.system("./link_grib.csh {met_today}* {met_tomorrow}".format(met_today=MET_TODAY,
         met_tomorrow=MET_TOMMOROW
         ))
-#    os.system("./ungrib.exe > ungrib.log 2>&1") # Output for ungrib.exe result.
+    os.system("./ungrib.exe > ungrib.log 2>&1") # Output for ungrib.exe result.
 
     ## metgrid
     print("metgrid")
-#    os.system("./metgrid.exe > metgrid.log 2>&1")
+    os.system("./metgrid.exe > metgrid.log 2>&1")
 
     os.chdir(WRF_DIR)
     
@@ -128,14 +132,14 @@ for day in range(DAYS.days):
     if not os.path.exists(LOGDIR): os.makedirs(LOGDIR)
 
     print("real")
-#    os.system("time mpirun -n 8 ./real.exe > real.log 2>&1" )
+    os.system("time mpirun -n 8 ./real.exe > real.log 2>&1" )
     for log in glob.glob("rsl.*"):
         os.rename(log, LOGDIR+"real-"+log+"-{now}".format(now=NOW.strftime("%Y%m%d")))
 
     print("wrf")
-#    os.system("time mpirun -n 8 ./wrf.exe > wrf.log 2>&1")
+    os.system("time mpirun -n 8 ./wrf.exe > wrf.log 2>&1")
     for log in glob.glob("rsl.*"):
-        os.rename(log, LOGDIR+"real-"+log+"-{now}".format(now=NOW.strftime("%Y%m%d")))
+        os.rename(log, LOGDIR+"wrf-"+log+"-{now}".format(now=NOW.strftime("%Y%m%d")))
 
-    print("finish")
     os.chdir(PWD)
+print("finish")
