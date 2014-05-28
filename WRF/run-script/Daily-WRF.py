@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-26T19:42+09:00)
+# (Last Update: 2014-05-28T10:59+09:00)
 
 import os, sys
 import datetime
@@ -59,8 +59,8 @@ for day in range(DAYS.days):
             s/(START_DATE)/{DATE1}/g; 
             s/(END_DATE)/{DATE2}/g;
             " namelist.wps.tmpl > namelist.wps""".format(
-            DATE1=(str(NOW.isoformat().replace("T","_")))*MAX_DOM,
-            DATE2=(TOMORROW.isoformat().replace("T","_"))*MAX_DOM
+            DATE1=NOW.isoformat().replace("T","_"),
+            DATE2=TOMORROW.isoformat().replace("T","_")
             )
         )
 

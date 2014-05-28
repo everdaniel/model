@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-27T13:44+09:00)
+# (Last Update: 2014-05-28T09:32+09:00)
 
 """flow
 1. import module.
@@ -22,7 +22,9 @@ model_type="WRF"
 ROOTDIR="~/run/20140528_WIND_MTG/"
 ROOTDIR=os.path.expanduser(ROOTDIR)
 INDIR=ROOTDIR+"output/"
-POS_FILE="observation/observation-position-d2.csv"
+POSDIR=ROOTDIR+"observation/"
+POS_FILE="observation-position-d2.csv"
+
 #FR=INDIR+INFILE
 OUTDIR=ROOTDIR+"point/"
 
@@ -87,7 +89,7 @@ for day in range(DAYS.days):
         BM.drawmeridians(np.arange(np.floor(BM.llcrnrlon), np.ceil(BM.urcrnrlon), 0.1),labels=[0,0,0,1])
 
 
-        pos_array=np.genfromtxt(ROOTDIR+POS_FILE,delimiter=",",names=True,dtype=None)
+        pos_array=np.genfromtxt(POSDIR+POS_FILE,delimiter=",",names=True,dtype=None)
 
         ## automatically get lattitude laongitude column header from character  "lat", "lon".
         ## automatically get position column header  from character "loc" or "cit" or "cap".
@@ -112,8 +114,9 @@ for day in range(DAYS.days):
         obstitle="Position of Observation"
         plt.title(obstitle)
 
-        plt.savefig(ROOTDIR+"fig/position.png",bbox_inches="tight")
-        plt.savefig(ROOTDIR+"fig/position.pdf",bbox_inches="tight")
+        #plt.savefig(ROOTDIR+"fig/position.pdf",bbox_inches="tight")
+        plt.savefig(OUTDIR+"/position.png",bbox_inches="tight")
+        plt.savefig(OUTDIR+"/position.pdf",bbox_inches="tight")
 
         ## convert projected x, y to model col, row.
         model_col=np.vectorize(round)(base_lon/DX -1.0).astype(int)
@@ -122,7 +125,7 @@ for day in range(DAYS.days):
     for ipos,position in enumerate(pos_city):
         if day ==0: ## write header
             FW=open(OUTDIR+"/"+position+".csv","w")
-            FW.write("# comment,"+"This data is extracted surface {model} output.".format(model=model_type.upper())+"\n")
+            FW.write("# comment,"+"This data is extracted from surface {model} output.".format(model=model_type.upper())+"\n")
             FW.write("# position,"+position+"\n")
             FW.write("# lon,"+str(pos_lon[ipos])+"\n")
             FW.write("# lat,"+str(pos_lat[ipos])+"\n")
@@ -132,6 +135,7 @@ for day in range(DAYS.days):
             FW.write("# MAPFAC_MY,"+str(MODEL_NC.variables["MAPFAC_MY"][0,model_row[ipos], model_col[ipos]])+"\n")
             FW.write("# COSALPHA,"+str(MODEL_NC.variables["COSALPHA"][0,model_row[ipos], model_col[ipos]])+"\n")
             FW.write("# SINALPHA,"+str(MODEL_NC.variables["SINALPHA"][0,model_row[ipos], model_col[ipos]])+"\n")
+            FW.write("# variable,"+",".join(varlist)+"\n")
             FW.write("# description,"+",".join(DESCLIST)+"\n")
             FW.write("# unit,"+",".join(UNITLIST)+"\n")
             FW.write("Date,"+",".join(varlist)+"\n")
