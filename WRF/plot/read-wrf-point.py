@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-28T22:34+09:00)
+# (Last Update: 2014-05-28T22:41+09:00)
 
 '''
 == Description ==
@@ -48,6 +48,12 @@ long,lat,city
 * START_DATE: start date.
 * END_DATE: end date. This day is not included for reading data.
 * INFILE: WRF output file name.
+
+
+== Optional ==
+In position.pdf, if you don't like margin of latitude and longitude grid, you can modify space of grid by following method place.
+BM.drawparallels(np.arange(np.floor(BM.llcrnrlat), np.ceil(BM.urcrnrlat), 1),labels=[1,0,0,0])
+BM.drawmeridians(np.arange(np.floor(BM.llcrnrlon), np.ceil(BM.urcrnrlon), 1),labels=[0,0,0,1])
 '''
 
 """
@@ -129,8 +135,8 @@ for day in range(DAYS.days):
         BM.fillcontinents(color=(0.8,1,0.8))
         #BM.drawparallels(np.arange(-90,90,1),labels=[0,1,0,0])
         #BM.drawmeridians(np.arange(-180,180,1),labels=[0,0,0,1])
-        BM.drawparallels(np.arange(np.floor(BM.llcrnrlat), np.ceil(BM.urcrnrlat), 0.1),labels=[1,0,0,0])
-        BM.drawmeridians(np.arange(np.floor(BM.llcrnrlon), np.ceil(BM.urcrnrlon), 0.1),labels=[0,0,0,1])
+        BM.drawparallels(np.arange(np.floor(BM.llcrnrlat), np.ceil(BM.urcrnrlat), 1),labels=[1,0,0,0])
+        BM.drawmeridians(np.arange(np.floor(BM.llcrnrlon), np.ceil(BM.urcrnrlon), 1),labels=[0,0,0,1])
 
 
         POS_ARRAY=np.genfromtxt(POSDIR+POS_FILE,delimiter=",",names=True,dtype=None)
