@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-28T22:23+09:00)
+# (Last Update: 2014-05-28T22:34+09:00)
 
 '''
 == Description ==
@@ -50,7 +50,6 @@ long,lat,city
 * INFILE: WRF output file name.
 '''
 
-
 """
 == Program flow ==
 1. Import module.
@@ -68,6 +67,7 @@ import os, sys
 import datetime
 
 MODEL_TYPE="WRF"
+## directory setting
 ROOTDIR="~/run/my-run/" # need modify
 ROOTDIR=os.path.expanduser(ROOTDIR)
 INDIR=ROOTDIR+"output/" # need modify
@@ -75,12 +75,11 @@ POSDIR=ROOTDIR+"observation/" # need modify
 POS_FILE="observation-position.csv" # need modify
 
 OUTDIR=ROOTDIR+"point/" # need modify
-
 if not os.path.exists(OUTDIR): os.makedirs(OUTDIR)
 
+## date setting
 START_DATE=datetime.datetime(2013,6,1) # need modify
 END_DATE=datetime.datetime(2013,6,4) # need modify
-
 DAYS=END_DATE-START_DATE
 
 
@@ -160,16 +159,18 @@ for day in range(DAYS.days):
         plt.title(obstitle)
 
         #plt.savefig(ROOTDIR+"fig/position.pdf",bbox_inches="tight")
-        plt.savefig(OUTDIR+"/position.png",bbox_inches="tight")
-        plt.savefig(OUTDIR+"/position.pdf",bbox_inches="tight")
+        plt.savefig(OUTDIR+"position.png",bbox_inches="tight")
+        plt.savefig(OUTDIR+"position.pdf",bbox_inches="tight")
 
         ## convert projected x, y to model col, row.
         model_col=np.vectorize(round)(base_lon/DX -1.0).astype(int)
         model_row=np.vectorize(round)(base_lat/DY -1.0).astype(int)
 
+
+    ## export surface WRF variables on position.
     for ipos,position in enumerate(pos_city):
         if day ==0: ## write header
-            FW=open(OUTDIR+"/"+position+".csv","w")
+            FW=open(OUTDIR+position+".csv","w")
             FW.write("# comment,"+"This data is extracted from surface {model} output.".format(model=MODEL_TYPE.upper())+"\n")
             FW.write("# position,"+position+"\n")
             FW.write("# lon,"+str(pos_lon[ipos])+"\n")
@@ -184,12 +185,12 @@ for day in range(DAYS.days):
             FW.write("# unit,"+",".join(UNITLIST)+"\n")
             FW.write("Date,"+",".join(VARLIST)+"\n")
             FW.close()
+        
+        ## write data
         for hour in range(24):
-            FW=open(OUTDIR+"/"+position+".csv","aw")
+            FW=open(OUTDIR+position+".csv","aw")
             line=[today.strftime("%Y%m%d")+"T"+str(hour).zfill(2)+"00Z"]
             for var in VARLIST:
                 line.append(MODEL_NC.variables[var][hour,model_row[ipos],model_col[ipos]])
             FW.write(",".join(map(str,line))+"\n")
             FW.close()
-FW.close()
-
