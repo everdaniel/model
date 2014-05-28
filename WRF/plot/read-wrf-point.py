@@ -1,14 +1,63 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-28T09:32+09:00)
+# (Last Update: 2014-05-28T22:23+09:00)
 
-"""flow
-1. import module.
-2. open file.
-3. get projection.
-4. get point(observation) position and convert.
-5. extract point data.
+'''
+== Description ==
+This Python program export surface variables of WRF output to csv file on specific longitude and latitude position. And plot observation position on WRF domain.
+
+output file is made in OUTDIR variable by following name:
+<position name>.csv
+position.pdf
+position.png
+
+
+== Input position file ===
+You must prepare target position data file.
+
+Sample file("observation-position.csv") is following format:
+Location,Longitude,Latitude
+Hinohara-mura,139.11,35.73
+Isahaya,130.017,32.8425
+
+In observation file, you must prepare for 3 columns.
+1. Location name.
+2. Longitude.
+3. Latitude.
+
+Location name is used identifying position(ex: output csv file name).
+And at least, 2 points data is required. Line 1 is column header. Bellow  line 2 are each position data.
+
+In column header, order and character cases is ignored. But each column header fields need specific sequence of character.
+    Location name column field: "loc" or "cit" or "cap".
+    Longitude: "lon".
+    Latitude: "lat".
+
+Ex: following position file is OK.
+long,lat,city
+139.11,35.73,Hinohara-mura
+130.017,32.8425,Isahaya
+
+
+== Variables for modifying ==
+* ROOTDIR: input and output root directory.
+* OUTDIR: output directory.
+* POS_DIR: position data file directory.
+* POS_FILE: position file name.
+* START_DATE: start date.
+* END_DATE: end date. This day is not included for reading data.
+* INFILE: WRF output file name.
+'''
+
+
+"""
+== Program flow ==
+1. Import module.
+2. Open file.
+3. Get projection.
+4. Get point(observation) position and convert.
+5. Extract point data.
 """
 
 import netCDF4
@@ -18,42 +67,38 @@ import numpy as np
 import os, sys
 import datetime
 
-model_type="WRF"
-ROOTDIR="~/run/20140528_WIND_MTG/"
+MODEL_TYPE="WRF"
+ROOTDIR="~/run/my-run/" # need modify
 ROOTDIR=os.path.expanduser(ROOTDIR)
-INDIR=ROOTDIR+"output/"
-POSDIR=ROOTDIR+"observation/"
-POS_FILE="observation-position-d2.csv"
+INDIR=ROOTDIR+"output/" # need modify
+POSDIR=ROOTDIR+"observation/" # need modify
+POS_FILE="observation-position.csv" # need modify
 
-#FR=INDIR+INFILE
-OUTDIR=ROOTDIR+"point/"
+OUTDIR=ROOTDIR+"point/" # need modify
 
 if not os.path.exists(OUTDIR): os.makedirs(OUTDIR)
 
-START_DATE=datetime.datetime(2013,6,1)
-END_DATE=datetime.datetime(2013,6,4)
+START_DATE=datetime.datetime(2013,6,1) # need modify
+END_DATE=datetime.datetime(2013,6,4) # need modify
 
 DAYS=END_DATE-START_DATE
 
 
 for day in range(DAYS.days):
-    NOW=START_DATE+datetime.timedelta(day)
-    print(NOW.isoformat())
-    INFILE="wrfout_d01_{date}_00:00:00".format(date=NOW.strftime("%Y-%m-%d"))
+    today=START_DATE+datetime.timedelta(day)
+    print(today.isoformat())
+    INFILE="wrfout_d01_{date}_00:00:00".format(date=today.strftime("%Y-%m-%d")) # need modify
     MODEL_NC=netCDF4.Dataset(INDIR+INFILE)
     
     if day == 0:
         ## get variable list and unit list
-        #varlist=MODEL_NC.variables.keys()
-        #varlist=MODEL_NC.getncattr("VAR-LIST").split()
-        #varlist="MAPFAC_MX MAPFAC_MY SINALPHA COSALPHA Q2 PSFC T2 TH2 U10 V10 RAINC RAINSH RAINNC SNOWNC".split()
-        varlist="Q2 PSFC T2 TH2 U10 V10 RAINC RAINSH RAINNC SNOWNC".split()
-        varlist.sort()
-        UNITLIST=[MODEL_NC.variables[var].units.strip() for var in varlist]
-        DESCLIST=[MODEL_NC.variables[var].description for var in varlist]
-#        varlist.extend("PM0.1 PM2.5 PM10".split())
+        #VARLIST=MODEL_NC.variables.keys()
+        VARLIST="Q2 PSFC T2 TH2 U10 V10 RAINC RAINSH RAINNC SNOWNC".split()
+        VARLIST.sort()
+        UNITLIST=[MODEL_NC.variables[var].units.strip() for var in VARLIST]
+        DESCLIST=[MODEL_NC.variables[var].description for var in VARLIST]
+#        VARLIST.extend("PM0.1 PM2.5 PM10".split())
 #        UNITLIST=[word.replace("micrograms","ug") for word in UNITLIST]
-#        UNITLIST=[word.replace("**","") for word in UNITLIST]
 #        UNITLIST=UNITLIST+["ug/m3"]*3
 
         ## get projection information
@@ -77,7 +122,7 @@ for day in range(DAYS.days):
         PARAMS={
                 "font.size": 18,
                 "legend.fontsize": "medium",
-                "lines.markersize": 10,
+                "lines.MARKERSize": 10,
                 }
         plt.rcParams.update(PARAMS)
 
@@ -89,26 +134,26 @@ for day in range(DAYS.days):
         BM.drawmeridians(np.arange(np.floor(BM.llcrnrlon), np.ceil(BM.urcrnrlon), 0.1),labels=[0,0,0,1])
 
 
-        pos_array=np.genfromtxt(POSDIR+POS_FILE,delimiter=",",names=True,dtype=None)
+        POS_ARRAY=np.genfromtxt(POSDIR+POS_FILE,delimiter=",",names=True,dtype=None)
 
         ## automatically get lattitude laongitude column header from character  "lat", "lon".
         ## automatically get position column header  from character "loc" or "cit" or "cap".
-        LON_LABEL="".join(filter(lambda x: "lon" in x.lower(), pos_array.dtype.names))
-        LAT_LABEL="".join(filter(lambda x: "lat" in x.lower(), pos_array.dtype.names))
-        POS_LABEL="".join(filter(lambda x: "loc" in x.lower() or "cit" in x.lower() or  "cap" in x.lower(), pos_array.dtype.names))
+        LON_LABEL="".join(filter(lambda x: "lon" in x.lower(), POS_ARRAY.dtype.names))
+        LAT_LABEL="".join(filter(lambda x: "lat" in x.lower(), POS_ARRAY.dtype.names))
+        POS_LABEL="".join(filter(lambda x: "loc" in x.lower() or "cit" in x.lower() or  "cap" in x.lower(), POS_ARRAY.dtype.names))
         ## get array of longitude, latitude, position name.
-        pos_lon=pos_array[LON_LABEL]
-        pos_lat=pos_array[LAT_LABEL]
-        pos_city=pos_array[POS_LABEL]
+        pos_lon=POS_ARRAY[LON_LABEL]
+        pos_lat=POS_ARRAY[LAT_LABEL]
+        pos_city=POS_ARRAY[POS_LABEL]
 
-        markers="o p d D < > ^ v p s d D * d x 6 7".split()
+        MARKERS="o p d D < > ^ v p s d D * d x 6 7".split()
 
         ## convert 1-D list of position  to 2-D mesh
         base_lon,base_lat=BM(pos_lon,pos_lat)
 
         ## plot observation
-        for i,city in enumerate(range(len(pos_array))):
-            plt.plot(base_lon[i],base_lat[i],c=plt.cm.rainbow(i*290/len(pos_array)),marker=markers[i],label=pos_city[i],alpha=1)
+        for i,city in enumerate(range(len(POS_ARRAY))):
+            plt.plot(base_lon[i],base_lat[i],c=plt.cm.rainbow(i*290/len(POS_ARRAY)),marker=MARKERS[i],label=pos_city[i],alpha=1)
 
         plt.legend(loc="best")
         obstitle="Position of Observation"
@@ -125,7 +170,7 @@ for day in range(DAYS.days):
     for ipos,position in enumerate(pos_city):
         if day ==0: ## write header
             FW=open(OUTDIR+"/"+position+".csv","w")
-            FW.write("# comment,"+"This data is extracted from surface {model} output.".format(model=model_type.upper())+"\n")
+            FW.write("# comment,"+"This data is extracted from surface {model} output.".format(model=MODEL_TYPE.upper())+"\n")
             FW.write("# position,"+position+"\n")
             FW.write("# lon,"+str(pos_lon[ipos])+"\n")
             FW.write("# lat,"+str(pos_lat[ipos])+"\n")
@@ -135,15 +180,14 @@ for day in range(DAYS.days):
             FW.write("# MAPFAC_MY,"+str(MODEL_NC.variables["MAPFAC_MY"][0,model_row[ipos], model_col[ipos]])+"\n")
             FW.write("# COSALPHA,"+str(MODEL_NC.variables["COSALPHA"][0,model_row[ipos], model_col[ipos]])+"\n")
             FW.write("# SINALPHA,"+str(MODEL_NC.variables["SINALPHA"][0,model_row[ipos], model_col[ipos]])+"\n")
-            FW.write("# variable,"+",".join(varlist)+"\n")
             FW.write("# description,"+",".join(DESCLIST)+"\n")
             FW.write("# unit,"+",".join(UNITLIST)+"\n")
-            FW.write("Date,"+",".join(varlist)+"\n")
+            FW.write("Date,"+",".join(VARLIST)+"\n")
             FW.close()
         for hour in range(24):
             FW=open(OUTDIR+"/"+position+".csv","aw")
-            line=[NOW.strftime("%Y%m%d")+"T"+str(hour).zfill(2)+"00Z"]
-            for var in varlist:
+            line=[today.strftime("%Y%m%d")+"T"+str(hour).zfill(2)+"00Z"]
+            for var in VARLIST:
                 line.append(MODEL_NC.variables[var][hour,model_row[ipos],model_col[ipos]])
             FW.write(",".join(map(str,line))+"\n")
             FW.close()
