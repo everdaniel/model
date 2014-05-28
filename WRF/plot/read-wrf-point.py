@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 # coding: utf-8
 # @author: SENOO, Ken
-# (Last Update: 2014-05-28T22:41+09:00)
+# (Last Update: 2014-05-28T23:14+09:00)
 
 '''
 == Description ==
@@ -120,7 +120,7 @@ for day in range(DAYS.days):
         NROWS=MODEL_NC.getncattr("SOUTH-NORTH_PATCH_END_UNSTAG")
 
         ## basemap
-        BM=Basemap(resolution="c", projection="lcc", lat_1=P_ALP, lat_2=P_BET, width=DX*(NCOLS-1), height=DY*(NROWS-1), lat_0=YCENT, lon_0=XCENT, rsphere=(6370000.0, 6370000.0))
+        BM=Basemap(resolution="i", projection="lcc", lat_1=P_ALP, lat_2=P_BET, width=DX*(NCOLS-1), height=DY*(NROWS-1), lat_0=YCENT, lon_0=XCENT, rsphere=(6370000.0, 6370000.0))
 
         plt.ion()
         plt.clf()
