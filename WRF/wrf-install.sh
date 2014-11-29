@@ -1,11 +1,12 @@
 #!/bin/bash
 # (File name: wrf-install.sh)
 # Author: SENOO, Ken
-# (Last update: 2014-11-30T03:44+09:00)
+# (Last update: 2014-11-30T04:25+09:00)
 # License: MIT
 
-# 参照: 
-# WRFv3.6.1をインストールするスクリプトです。事前にstowをインストールしておく。また，gfortran, make, tcshもインストールしておく。まだなら，たとえば以下のapt-getでインストールする。
+# 参照: http://www.slideshare.net/iesli/20141129-senooken-introductionofwrf
+# WRFv3.6.1をインストールするスクリプトです。Ubuntu 14.04 64bitで動作を確認済み。
+# 事前にstowをインストールしておく。また，gfortran, make, tcshもインストールしておく。まだなら，たとえば以下のapt-getでインストールする。
 # sudo apt-get install stow gfortran make csh
 #
 # WVER変数にインストールしたいWRFのバージョンを書いて以下のコマンドで実行する。
@@ -13,7 +14,7 @@
 #
 # インストールが完了するまでに約30 minほどかかる。
 # 標準ではコンパイラにgfortran+gccを使い，NetCDF-4をオン，sm+dmの並列計算を有効にしてビルドする。
-# 3.6.1と違うバージョンのWRFをインストールする場合，WRFとWPSのconfigureで選択するオプションの数字が異なるので，変更する。
+# 3.6.1と違うバージョンのWRFをインストールする場合，WRFとWPSのconfigureで選択するオプションの数字が異なるので変更する。
 #
 # ifortでビルドしたければ，以下のコンパイラ変数を設定する。
 # export FC=ifort
@@ -23,7 +24,7 @@
 #
 # また，WRFとWPSのconfigureで選択するオプションの数字を変更する。
 #
-# インストールが完了し，WRFを実行する前には，必ず.wrfrcファイルを以下のコマンドで実行して設定を読み込んでください。
+# インストールが完了し，WRFを実行する前には，必ず.wrfrcファイルを以下のコマンドで実行して設定を読み込む。
 # source .wrfrc
 
 WVER=3.6.1
